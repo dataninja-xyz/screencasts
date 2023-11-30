@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+
+  database:
+    image: mysql:5.7
+    container_name: database
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: dataninja
+      MYSQL_DATABASE: laravel10-blog
+
+  laravel10-blog:
+    build:
+      context: ./docker/php-fpm
+    container_name: laravel10-blog
+    depends_on:
+      - database
+    volumes:
+      - ./src/:/var/www/html
+    working_dir: /var/www/html
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    container_name: nginx
+    ports:
+      - "8000:80"
+    depends_on:
+      - laravel10-blog
+    volumes:
+      - ./src/:/var/www/html
+
+volumes:
+  mysql-volume:
+
+networks:
+  default:
+    name: dataninja-network
